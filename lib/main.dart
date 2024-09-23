@@ -26,11 +26,11 @@ class ButtonPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(11, 17, 43, 1), // Color de fondo del AppBar
+        backgroundColor: Color.fromRGBO(11, 17, 43, 1),
         title: Text(
           'UTB Tools',
           style: TextStyle(
-            color: Colors.white, // Color del texto del título
+            color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -45,32 +45,31 @@ class ButtonPage extends StatelessWidget {
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(1.0),
           child: Container(
-            color: Colors.grey[400], // Línea gris debajo del AppBar
+            color: Colors.grey[400],
             height: 1.0,
           ),
         ),
       ),
-      backgroundColor: Color.fromRGBO(11, 17, 43, 1), // Fondo oscuro original
+      backgroundColor: Color.fromRGBO(11, 17, 43, 1),
       body: Column(
         children: [
           Expanded(
             child: Center(
               child: Column(
-                mainAxisSize: MainAxisSize.min, // Minimiza el espacio ocupado por la columna
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Implementación del Logo con tamaño ajustado
                   Image.asset(
-                    'assets/images/utb_tools_logo.jpeg', // Asegúrate de que la extensión coincida
-                    width: 300, // Tamaño del logo
-                    height: 300, // Tamaño del logo
+                    'assets/images/utb_tools_logo.jpeg',
+                    width: 300,
+                    height: 300,
                   ),
-                  SizedBox(height: 20), // Menos espacio entre el logo y los botones
+                  SizedBox(height: 20),
                   _buildButton('CONVERTIR ARCHIVOS', () {}),
-                  SizedBox(height: 15),
+                  SizedBox(height: 20),
                   _buildButton('CALCULA TU NOTA', () {
                     Navigator.pushNamed(context, '/calculate-grade');
                   }),
-                  SizedBox(height: 15),
+                  SizedBox(height: 20),
                   _buildButton('GENERAR HORARIO', () {}),
                 ],
               ),
@@ -79,7 +78,7 @@ class ButtonPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Align(
-              alignment: Alignment.bottomCenter, // Alinea el texto en la parte inferior
+              alignment: Alignment.bottomCenter,
               child: Text(
                 'UTB Tools© 2024',
                 style: TextStyle(
@@ -96,11 +95,11 @@ class ButtonPage extends StatelessWidget {
 
   Widget _buildButton(String text, VoidCallback onPressed) {
     return SizedBox(
-      width: 280,
-      height: 50,
+      width: 300,  // Aumenté el tamaño del botón
+      height: 60,  // Aumenté el tamaño del botón
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color.fromRGBO(11, 123, 142, 1), // Azul verdoso original de los botones
+          backgroundColor: Color.fromRGBO(11, 123, 142, 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
@@ -109,8 +108,8 @@ class ButtonPage extends StatelessWidget {
         child: Text(
           text,
           style: TextStyle(
-            color: Colors.white, // Texto blanco
-            fontSize: 16,
+            color: Colors.white,
+            fontSize: 18,  // Aumenté el tamaño de la fuente
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -153,26 +152,41 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
     });
   }
 
+  void limpiarCampos() {
+    setState(() {
+      corte1Controller.clear();
+      corte2Controller.clear();
+      notaFinalNecesaria = 0.0;
+      mensaje = '';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(11, 123, 142, 1), // Azul verdoso original
-        elevation: 0,
-        title: TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: Text(
-            'Volver al Menú',
-            style: TextStyle(
-              color: Colors.white, // Texto blanco
-              fontSize: 16,
-            ),
+        backgroundColor: Color.fromRGBO(11, 17, 43, 1), // Fondo azul oscuro
+        title: Text(
+          'UTB Tools',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.menu, color: Colors.white), // Botón de menú de tres líneas
+            onPressed: () {
+              // Acción del botón de menú
+            },
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(1.0), // Línea fina
+          child: Container(
+            color: Colors.grey[400],
+            height: 1.0,
           ),
         ),
       ),
-      backgroundColor: Color.fromRGBO(11, 17, 43, 1), // Fondo oscuro original
+      backgroundColor: Color.fromRGBO(11, 17, 43, 1),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -180,59 +194,113 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(
-                width: 300,
-                child: TextField(
-                  controller: corte1Controller,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Nota del Corte 1 (0-5)',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              SizedBox(
-                width: 300,
-                child: TextField(
-                  controller: corte2Controller,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    labelText: 'Nota del Corte 2 (0-5)',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromRGBO(11, 123, 142, 1), // Azul verdoso original
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                ),
-                onPressed: calcularNotaFinal,
-                child: Text('Calcular Nota Final Necesaria'),
-              ),
-              SizedBox(height: 20),
               Text(
-                'Nota necesaria en el corte final para aprobar: ${notaFinalNecesaria.toStringAsFixed(2)}',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-                textAlign: TextAlign.center,
+                'Calcula tu nota',
+                style: TextStyle(fontSize: 30, color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: [
+                      Text('Primera nota', style: TextStyle(color: Colors.white)),
+                      SizedBox(
+                        width: 200,
+                        child: TextField(
+                          controller: corte1Controller,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: 'Ingresa la primera nota',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(width: 30),
+                  Column(
+                    children: [
+                      Text('Segunda nota', style: TextStyle(color: Colors.white)),
+                      SizedBox(
+                        width: 200,
+                        child: TextField(
+                          controller: corte2Controller,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            hintText: 'Ingresa la segunda nota',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: calcularNotaFinal,
+                    child: Text('Calcular'),
+                  ),
+                  SizedBox(width: 20),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                    onPressed: limpiarCampos,
+                    child: Text('Limpiar'),
+                  ),
+                ],
+              ),
+              SizedBox(height: 30),
+              Text(
+                'NOTA MINIMA EN TERCER CORTE PARA APROBAR:',
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              SizedBox(height: 10),
+              Text(
+                notaFinalNecesaria > 0
+                    ? notaFinalNecesaria.toStringAsFixed(2)
+                    : 'RESULTADO',
+                style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               SizedBox(height: 20),
               Text(
                 mensaje,
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                style: TextStyle(color: Colors.white, fontSize: 18),
                 textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 40),
+              Image.asset(
+                'assets/images/utb_tools_logo.jpeg',
+                width: 100,
+                height: 100,
+              ),
+              SizedBox(height: 20),
+              Text(
+                'UTB Tools© 2024',
+                style: TextStyle(color: Colors.white, fontSize: 14),
               ),
             ],
           ),
