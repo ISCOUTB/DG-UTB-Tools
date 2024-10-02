@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(MyWebApp());
@@ -136,7 +137,8 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
     double pesoCorte2 = 0.35;
     double pesoCorte3 = 0.35;
 
-    double notaRequerida = (3 - (corte1 * pesoCorte1 + corte2 * pesoCorte2)) / pesoCorte3;
+    double notaRequerida = (3 - (corte1 * pesoCorte1 + corte2 * pesoCorte2)) /
+        pesoCorte3;
     setState(() {
       notaFinalNecesaria = notaRequerida;
 
@@ -165,21 +167,35 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(11, 17, 43, 1), // Fondo azul oscuro
+        backgroundColor: Color.fromRGBO(11, 17, 43, 1),
+        // Fondo azul oscuro
         title: Text(
           'UTB Tools',
           style: TextStyle(color: Colors.white),
         ),
+        leading: TextButton(
+          onPressed: () {
+            Navigator.pop(context); // Acción para volver al menú principal
+          },
+          child: Text(
+            '⭠',
+            style: TextStyle(
+              color: Colors.white, // Texto en blanco
+              fontWeight: FontWeight.bold, // Texto en negrita
+            ),
+          ),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.menu, color: Colors.white), // Botón de menú de tres líneas
+            icon: Icon(Icons.menu, color: Colors.white),
+            // Botón de menú de tres líneas
             onPressed: () {
               // Acción del botón de menú
             },
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.0), // Línea fina
+          preferredSize: Size.fromHeight(1.0), // Línea fina debajo del AppBar
           child: Container(
             color: Colors.grey[400],
             height: 1.0,
@@ -196,7 +212,9 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
             children: [
               Text(
                 'Calcula tu nota',
-                style: TextStyle(fontSize: 30, color: Colors.white, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 30,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 40),
               Row(
@@ -204,12 +222,18 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
                 children: [
                   Column(
                     children: [
-                      Text('Primera nota', style: TextStyle(color: Colors.white)),
+                      Text('Primera nota',
+                          style: TextStyle(color: Colors.white)),
                       SizedBox(
                         width: 200,
                         child: TextField(
                           controller: corte1Controller,
-                          keyboardType: TextInputType.number,
+                          keyboardType: TextInputType.numberWithOptions(
+                              decimal: true),
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(RegExp(
+                                r'[0-9.]')), // Permite solo números y el punto
+                          ],
                           decoration: InputDecoration(
                             hintText: 'Ingresa la primera nota',
                             filled: true,
@@ -225,12 +249,18 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
                   SizedBox(width: 30),
                   Column(
                     children: [
-                      Text('Segunda nota', style: TextStyle(color: Colors.white)),
+                      Text('Segunda nota',
+                          style: TextStyle(color: Colors.white)),
                       SizedBox(
                         width: 200,
                         child: TextField(
                           controller: corte2Controller,
-                          keyboardType: TextInputType.number,
+                          keyboardType: TextInputType.numberWithOptions(
+                              decimal: true),
+                          inputFormatters: <TextInputFormatter>[
+                            FilteringTextInputFormatter.allow(RegExp(
+                                r'[0-9.]')), // Permite solo números y el punto
+                          ],
                           decoration: InputDecoration(
                             hintText: 'Ingresa la segunda nota',
                             filled: true,
@@ -251,13 +281,19 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: Color(0xFF0B7B8E), // Color azul del logo
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
                     ),
                     onPressed: calcularNotaFinal,
-                    child: Text('Calcular'),
+                    child: Text(
+                      'Calcular',
+                      style: TextStyle(
+                        color: Colors.black, // Texto en color negro
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                   SizedBox(width: 20),
                   ElevatedButton(
