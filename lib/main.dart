@@ -179,7 +179,7 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
           },
           child: Text(
             '⭠',
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white, // Texto en blanco
               fontWeight: FontWeight.bold, // Texto en negrita
             ),
