@@ -26,7 +26,7 @@ class ButtonPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color.fromRGBO(11, 17, 43, 1),
+        backgroundColor: const Color.fromRGBO(11, 17, 43, 1),
         title: Text(
           'UTB Tools',
           style: TextStyle(
