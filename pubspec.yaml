@@ -11,6 +11,17 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  universal_html: ^2.0.5
+  file_picker: ^4.6.1 # Para seleccionar archivos
+  path_provider: ^2.0.11 # Para guardar archivos en el dispositivo
+  pdf: ^3.3.0 # Para generar archivos PDF
+  excel: ^2.0.6 # Para generar archivos Excel (.xlsx)
+  dio: ^5.0.0 # Para gestionar las descargas y peticiones HTTP
+  open_filex: ^3.4.0 # Para abrir archivos generados
+  
+  
+
+  
 
 dev_dependencies:
   flutter_test:

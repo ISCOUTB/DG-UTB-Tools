@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:file_picker/file_picker.dart';
+import 'dart:html' as html;  // Para manejo de archivos en web
+import 'dart:typed_data';  // Para manejar bytes de archivos
+
+
+
+
 
 void main() {
   runApp(MyWebApp());
@@ -17,10 +24,12 @@ class MyWebApp extends StatelessWidget {
       routes: {
         '/': (context) => ButtonPage(),
         '/calculate-grade': (context) => CalculateGradePage(),
+        '/convert-files': (context) => FileConverterPage(),  // Ruta para la página de conversión
       },
     );
   }
 }
+
 
 class ButtonPage extends StatelessWidget {
   @override
@@ -28,7 +37,7 @@ class ButtonPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromRGBO(11, 17, 43, 1),
-        title: Text(
+        title: const Text(
           'UTB Tools',
           style: TextStyle(
             color: Colors.white,
@@ -37,14 +46,14 @@ class ButtonPage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.menu, color: Colors.white), // Icono de menú a la derecha
+            icon: const Icon(Icons.menu, color: Colors.white),
             onPressed: () {
               // Acción para el botón del menú
             },
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.0),
+          preferredSize: const Size.fromHeight(1.0),
           child: Container(
             color: Colors.grey[400],
             height: 1.0,
@@ -64,13 +73,15 @@ class ButtonPage extends StatelessWidget {
                     width: 300,
                     height: 300,
                   ),
-                  SizedBox(height: 20),
-                  _buildButton('CONVERTIR ARCHIVOS', () {}),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
+                  _buildButton('CONVERTIR ARCHIVOS', () {
+                    Navigator.pushNamed(context, '/convert-files');  // Navegación hacia la página de conversión
+                  }),
+                  const SizedBox(height: 20),
                   _buildButton('CALCULA TU NOTA', () {
                     Navigator.pushNamed(context, '/calculate-grade');
                   }),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   _buildButton('GENERAR HORARIO', () {}),
                 ],
               ),
@@ -96,8 +107,8 @@ class ButtonPage extends StatelessWidget {
 
   Widget _buildButton(String text, VoidCallback onPressed) {
     return SizedBox(
-      width: 300,  // Aumenté el tamaño del botón
-      height: 60,  // Aumenté el tamaño del botón
+      width: 300,
+      height: 60,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Color.fromRGBO(11, 123, 142, 1),
@@ -110,7 +121,7 @@ class ButtonPage extends StatelessWidget {
           text,
           style: TextStyle(
             color: Colors.white,
-            fontSize: 18,  // Aumenté el tamaño de la fuente
+            fontSize: 18,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -118,6 +129,7 @@ class ButtonPage extends StatelessWidget {
     );
   }
 }
+
 
 class CalculateGradePage extends StatefulWidget {
   @override
@@ -340,6 +352,179 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// CONVERTIDOR DE ARCHIVOS
+FilePickerResult? result; // Define result como una variable global dentro de la clase
+
+class FileConverterPage extends StatefulWidget {
+  @override
+  _FileConverterPageState createState() => _FileConverterPageState();
+}
+
+class _FileConverterPageState extends State<FileConverterPage> {
+  String? selectedFileType;
+  String? fileName;
+  Uint8List? fileBytes;  // To store selected file bytes
+  final List<String> fileTypes = ['.docx', '.pdf', '.xlsx', '.txt'];
+
+  // Function to select the file
+  void selectFile() async {
+    result = await FilePicker.platform.pickFiles();
+
+    if (result != null) {
+      setState(() {
+        fileBytes = result!.files.single.bytes;
+        fileName = result!.files.single.name;
+      });
+    } else {
+      print('No file selected');
+    }
+  }
+
+  // Function to rename the file with the selected extension
+  void renameFile() {
+    if (fileName != null && selectedFileType != null && fileBytes != null) {
+      // Extract the original name without the extension
+      String baseName = fileName!.split('.').first;
+
+      // Create the new file name with the selected extension
+      String newFileName = '$baseName$selectedFileType';
+
+      // Trigger the download with the renamed file
+      downloadWebFile(fileBytes!, newFileName);
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Archivo renombrado y descargado como $newFileName'),
+      ));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Por favor, selecciona un archivo y un formato.'),
+      ));
+    }
+  }
+
+  // Function to download the file in the web environment
+  void downloadWebFile(Uint8List bytes, String fileName) {
+    final blob = html.Blob([bytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute("download", fileName)
+      ..click();
+    html.Url.revokeObjectUrl(url);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Color.fromRGBO(11, 17, 43, 1),
+        title: Text('UTB Tools', style: TextStyle(color: Colors.white)),
+      ),
+      backgroundColor: Color.fromRGBO(11, 17, 43, 1),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/utb_tools_logo.jpeg',
+              width: 200,
+              height: 200,
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Convertir Archivos',
+              style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: selectFile,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Colors.black54,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    fileName ?? 'Selecciona o arrastra el archivo a convertir',
+                    style: TextStyle(color: Colors.black54),
+                  ),
+                  Icon(Icons.upload_file, color: Colors.black54),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            DropdownButton<String>(
+              hint: Text('Convertir A:', style: TextStyle(color: Colors.white)),
+              dropdownColor: Color.fromRGBO(11, 17, 43, 1),
+              value: selectedFileType,
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+              iconSize: 24,
+              style: const TextStyle(color: Colors.white),
+              onChanged: (String? newValue) {
+                setState(() {
+                  selectedFileType = newValue;
+                });
+              },
+              items: fileTypes.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: renameFile,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                  child: Text('Convertir'),
+                ),
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      fileName = null;
+                      selectedFileType = null;
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                  ),
+                  child: Text('Cancelar'),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            LinearProgressIndicator(
+              value: 0.0,
+              backgroundColor: Colors.grey[400],
+              color: Colors.green,
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'UTB Tools© 2024',
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ],
         ),
       ),
     );
