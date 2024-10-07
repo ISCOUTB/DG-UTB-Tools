@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
-import 'dart:html' as html;  // Para manejo de archivos en web
-import 'dart:typed_data';  // Para manejar bytes de archivos
-
-
-
-
+import 'dart:html' as html;
+import 'dart:typed_data';
+import 'dart:math';
 
 void main() {
   runApp(MyWebApp());
@@ -24,13 +21,14 @@ class MyWebApp extends StatelessWidget {
       routes: {
         '/': (context) => ButtonPage(),
         '/calculate-grade': (context) => CalculateGradePage(),
-        '/convert-files': (context) => FileConverterPage(),  // Ruta para la página de conversión
+        '/convert-files': (context) => FileConverterPage(),
+        '/schedule': (context) => SchedulePage(),
       },
     );
   }
 }
 
-
+// Página principal con los botones para las diferentes funciones
 class ButtonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -44,14 +42,6 @@ class ButtonPage extends StatelessWidget {
             fontWeight: FontWeight.bold,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white),
-            onPressed: () {
-              // Acción para el botón del menú
-            },
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(
@@ -75,14 +65,16 @@ class ButtonPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   _buildButton('CONVERTIR ARCHIVOS', () {
-                    Navigator.pushNamed(context, '/convert-files');  // Navegación hacia la página de conversión
+                    Navigator.pushNamed(context, '/convert-files');
                   }),
                   const SizedBox(height: 20),
                   _buildButton('CALCULA TU NOTA', () {
                     Navigator.pushNamed(context, '/calculate-grade');
                   }),
                   const SizedBox(height: 20),
-                  _buildButton('GENERAR HORARIO', () {}),
+                  _buildButton('GENERAR HORARIO', () {
+                    Navigator.pushNamed(context, '/schedule');
+                  }),
                 ],
               ),
             ),
@@ -130,7 +122,7 @@ class ButtonPage extends StatelessWidget {
   }
 }
 
-
+// Página para calcular la nota final
 class CalculateGradePage extends StatefulWidget {
   @override
   _CalculateGradePageState createState() => _CalculateGradePageState();
@@ -149,8 +141,7 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
     double pesoCorte2 = 0.35;
     double pesoCorte3 = 0.35;
 
-    double notaRequerida = (3 - (corte1 * pesoCorte1 + corte2 * pesoCorte2)) /
-        pesoCorte3;
+    double notaRequerida = (3 - (corte1 * pesoCorte1 + corte2 * pesoCorte2)) / pesoCorte3;
     setState(() {
       notaFinalNecesaria = notaRequerida;
 
@@ -180,37 +171,20 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromRGBO(11, 17, 43, 1),
-        // Fondo azul oscuro
         title: Text(
           'UTB Tools',
           style: TextStyle(color: Colors.white),
         ),
         leading: TextButton(
           onPressed: () {
-            Navigator.pop(context); // Acción para volver al menú principal
+            Navigator.pop(context);
           },
           child: Text(
             '⭠',
             style: const TextStyle(
-              color: Colors.white, // Texto en blanco
-              fontWeight: FontWeight.bold, // Texto en negrita
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.menu, color: Colors.white),
-            // Botón de menú de tres líneas
-            onPressed: () {
-              // Acción del botón de menú
-            },
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(1.0), // Línea fina debajo del AppBar
-          child: Container(
-            color: Colors.grey[400],
-            height: 1.0,
           ),
         ),
       ),
@@ -224,9 +198,7 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
             children: [
               Text(
                 'Calcula tu nota',
-                style: TextStyle(fontSize: 30,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 30, color: Colors.white, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 40),
               Row(
@@ -234,17 +206,14 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
                 children: [
                   Column(
                     children: [
-                      Text('Primera nota',
-                          style: TextStyle(color: Colors.white)),
+                      Text('Primera nota', style: TextStyle(color: Colors.white)),
                       SizedBox(
                         width: 200,
                         child: TextField(
                           controller: corte1Controller,
-                          keyboardType: TextInputType.numberWithOptions(
-                              decimal: true),
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9.]')), // Permite solo números y el punto
+                            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Ingresa la primera nota',
@@ -261,17 +230,14 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
                   SizedBox(width: 30),
                   Column(
                     children: [
-                      Text('Segunda nota',
-                          style: TextStyle(color: Colors.white)),
+                      Text('Segunda nota', style: TextStyle(color: Colors.white)),
                       SizedBox(
                         width: 200,
                         child: TextField(
                           controller: corte2Controller,
-                          keyboardType: TextInputType.numberWithOptions(
-                              decimal: true),
+                          keyboardType: TextInputType.numberWithOptions(decimal: true),
                           inputFormatters: <TextInputFormatter>[
-                            FilteringTextInputFormatter.allow(RegExp(
-                                r'[0-9.]')), // Permite solo números y el punto
+                            FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
                           ],
                           decoration: InputDecoration(
                             hintText: 'Ingresa la segunda nota',
@@ -293,7 +259,7 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
                 children: [
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF0B7B8E), // Color azul del logo
+                      backgroundColor: Color(0xFF0B7B8E),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
                       ),
@@ -301,10 +267,7 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
                     onPressed: calcularNotaFinal,
                     child: Text(
                       'Calcular',
-                      style: TextStyle(
-                        color: Colors.black, // Texto en color negro
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                     ),
                   ),
                   SizedBox(width: 20),
@@ -312,9 +275,7 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                     ),
                     onPressed: limpiarCampos,
                     child: Text('Limpiar'),
@@ -328,9 +289,7 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
               ),
               SizedBox(height: 10),
               Text(
-                notaFinalNecesaria > 0
-                    ? notaFinalNecesaria.toStringAsFixed(2)
-                    : 'RESULTADO',
+                notaFinalNecesaria > 0 ? notaFinalNecesaria.toStringAsFixed(2) : 'RESULTADO',
                 style: TextStyle(color: Colors.white, fontSize: 18),
               ),
               SizedBox(height: 20),
@@ -358,21 +317,20 @@ class _CalculateGradePageState extends State<CalculateGradePage> {
   }
 }
 
-// CONVERTIDOR DE ARCHIVOS
-FilePickerResult? result; // Define result como una variable global dentro de la clase
-
+// Página para convertir archivos
 class FileConverterPage extends StatefulWidget {
   @override
   _FileConverterPageState createState() => _FileConverterPageState();
 }
 
 class _FileConverterPageState extends State<FileConverterPage> {
+  FilePickerResult? result;
   String? selectedFileType;
   String? fileName;
-  Uint8List? fileBytes;  // To store selected file bytes
+  Uint8List? fileBytes;
+
   final List<String> fileTypes = ['.docx', '.pdf', '.xlsx', '.txt'];
 
-  // Function to select the file
   void selectFile() async {
     result = await FilePicker.platform.pickFiles();
 
@@ -386,16 +344,10 @@ class _FileConverterPageState extends State<FileConverterPage> {
     }
   }
 
-  // Function to rename the file with the selected extension
   void renameFile() {
     if (fileName != null && selectedFileType != null && fileBytes != null) {
-      // Extract the original name without the extension
       String baseName = fileName!.split('.').first;
-
-      // Create the new file name with the selected extension
       String newFileName = '$baseName$selectedFileType';
-
-      // Trigger the download with the renamed file
       downloadWebFile(fileBytes!, newFileName);
 
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -408,7 +360,6 @@ class _FileConverterPageState extends State<FileConverterPage> {
     }
   }
 
-  // Function to download the file in the web environment
   void downloadWebFile(Uint8List bytes, String fileName) {
     final blob = html.Blob([bytes]);
     final url = html.Url.createObjectUrlFromBlob(blob);
@@ -523,6 +474,231 @@ class _FileConverterPageState extends State<FileConverterPage> {
             const Text(
               'UTB Tools© 2024',
               style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Nueva página de generación de horarios con colores aleatorios
+class SchedulePage extends StatefulWidget {
+  @override
+  _SchedulePageState createState() => _SchedulePageState();
+}
+
+class _SchedulePageState extends State<SchedulePage> {
+  final TextEditingController subjectController = TextEditingController();
+  String selectedDay = 'Lunes';
+  String selectedTime = '07:00 - 07:50';
+  Map<String, Map<String, String>> schedule = {};
+  Map<String, Color> subjectColors = {}; // Mapa para asignar colores aleatorios a las materias
+
+  final List<String> hours = [
+    '07:00 - 07:50',
+    '08:00 - 08:50',
+    '09:00 - 09:50',
+    '10:00 - 10:50',
+    '11:00 - 11:50',
+    '12:00 - 12:50',
+    '13:00 - 13:50',
+    '14:00 - 14:50',
+    '15:00 - 15:50',
+    '16:00 - 16:50',
+    '17:00 - 17:50',
+    '18:00 - 18:50',
+    '19:00 - 19:50',
+    '20:00 - 20:50',
+    '21:00 - 21:50',
+  ];
+
+  final List<String> days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+  void addSubjectToSchedule() {
+    if (subjectController.text.isNotEmpty) {
+      setState(() {
+        if (schedule[selectedTime] == null) {
+          schedule[selectedTime] = {};
+        }
+        schedule[selectedTime]![selectedDay] = subjectController.text;
+
+        // Asignar un color aleatorio a la materia si no tiene uno
+        if (!subjectColors.containsKey(subjectController.text)) {
+          subjectColors[subjectController.text] = getRandomColor();
+        }
+      });
+      subjectController.clear();
+    }
+  }
+
+  Color getRandomColor() {
+    Random random = Random();
+    return Color.fromARGB(
+      255,
+      random.nextInt(256),
+      random.nextInt(256),
+      random.nextInt(256),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Generar Horario'),
+        backgroundColor: Color.fromRGBO(11, 17, 43, 1),
+      ),
+      backgroundColor: Color.fromRGBO(11, 17, 43, 1),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(
+              'Ingresa una materia, selecciona el día y la hora:',
+              style: TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: subjectController,
+              style: TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: 'Materia',
+                labelStyle: TextStyle(color: Colors.white),
+                filled: true,
+                fillColor: Colors.grey[600],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: DropdownButton<String>(
+                    dropdownColor: Color.fromRGBO(11, 17, 43, 1),
+                    value: selectedDay,
+                    items: days.map((String day) {
+                      return DropdownMenuItem<String>(
+                        value: day,
+                        child: Text(day, style: TextStyle(color: Colors.white)),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedDay = newValue!;
+                      });
+                    },
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: DropdownButton<String>(
+                    dropdownColor: Color.fromRGBO(11, 17, 43, 1),
+                    value: selectedTime,
+                    items: hours.map((String time) {
+                      return DropdownMenuItem<String>(
+                        value: time,
+                        child: Text(time, style: TextStyle(color: Colors.white)),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedTime = newValue!;
+                      });
+                    },
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: addSubjectToSchedule,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromRGBO(11, 123, 142, 1),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: Text('Agregar Materia'),
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Table(
+                  border: TableBorder.all(color: Colors.blue, width: 2),
+                  columnWidths: const {
+                    0: FlexColumnWidth(2),
+                    1: FlexColumnWidth(1),
+                    2: FlexColumnWidth(1),
+                    3: FlexColumnWidth(1),
+                    4: FlexColumnWidth(1),
+                    5: FlexColumnWidth(1),
+                    6: FlexColumnWidth(1),
+                    7: FlexColumnWidth(1),
+                  },
+                  children: [
+                    TableRow(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(8.0),
+                          color: Color.fromRGBO(11, 123, 142, 1),
+                          child: Center(
+                            child: Text('Horas', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        ...days.map(
+                              (day) => Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Color.fromRGBO(11, 123, 142, 1),
+                            child: Center(
+                              child: Text(
+                                day,
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    ...hours.map(
+                          (hour) => TableRow(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8.0),
+                            color: Colors.blue[300],
+                            child: Center(
+                              child: Text(
+                                hour,
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                          ...days.map(
+                                (day) {
+                              String? subject = schedule[hour] != null ? schedule[hour]![day] : null;
+                              return Container(
+                                height: 50,
+                                padding: EdgeInsets.all(8.0),
+                                color: subject != null ? subjectColors[subject] : Colors.grey[300],
+                                child: Center(
+                                  child: Text(
+                                    subject ?? '',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                ),
+                              );
+                            },
+                          ).toList(),
+                        ],
+                      ),
+                    ).toList(),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
