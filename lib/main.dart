@@ -83,7 +83,7 @@ class ButtonPage extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 20.0),
             child: Align(
               alignment: Alignment.bottomCenter,
-              child: Text(
+              child: const Text(
                 'UTB Tools© 2024',
                 style: TextStyle(
                   color: Colors.white,
