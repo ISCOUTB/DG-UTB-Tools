@@ -1,16 +1,5 @@
-# dg_utb_tools
-
-UTB-Tools
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# UTB Tools
+Una aplicación que pretende mejorar la eficiencia académica de los estudiantes al integrar tres herramientas esenciales en una sola aplicación:
+- Convertidor de archivos.
+- Calculadora de nota necesaria para aprobar la materia.
+- Generador de horarios.
