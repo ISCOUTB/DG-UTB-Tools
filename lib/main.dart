@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:excel/excel.dart';  // For Excel functionality
 import 'dart:html' as html;
 import 'dart:typed_data';
 import 'dart:math';
@@ -482,39 +483,42 @@ class _FileConverterPageState extends State<FileConverterPage> {
   }
 }
 
-// Nueva página de generación de horarios con colores aleatorios
+// Nueva página de generación de horarios con colores aleatorios y botón de limpiar
 class SchedulePage extends StatefulWidget {
   @override
   _SchedulePageState createState() => _SchedulePageState();
 }
 
+String? selectedSubject;  // Variable para almacenar la materia seleccionada
+
 class _SchedulePageState extends State<SchedulePage> {
   final TextEditingController subjectController = TextEditingController();
   String selectedDay = 'Lunes';
-  String selectedTime = '07:00 - 07:50';
+  String selectedTime = '07:00 - 08:00';
   Map<String, Map<String, String>> schedule = {};
   Map<String, Color> subjectColors = {}; // Mapa para asignar colores aleatorios a las materias
 
   final List<String> hours = [
-    '07:00 - 07:50',
-    '08:00 - 08:50',
-    '09:00 - 09:50',
-    '10:00 - 10:50',
-    '11:00 - 11:50',
-    '12:00 - 12:50',
-    '13:00 - 13:50',
-    '14:00 - 14:50',
-    '15:00 - 15:50',
-    '16:00 - 16:50',
-    '17:00 - 17:50',
-    '18:00 - 18:50',
-    '19:00 - 19:50',
-    '20:00 - 20:50',
-    '21:00 - 21:50',
+    '07:00 - 08:00',
+    '08:00 - 09:00',
+    '09:00 - 10:00',
+    '10:00 - 11:00',
+    '11:00 - 12:00',
+    '12:00 - 13:00',
+    '13:00 - 14:00',
+    '14:00 - 15:00',
+    '15:00 - 16:00',
+    '16:00 - 17:00',
+    '17:00 - 18:00',
+    '18:00 - 19:00',
+    '19:00 - 20:00',
+    '20:00 - 21:00',
+    '21:00 - 22:00',
   ];
 
   final List<String> days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
+  // Función para añadir materia al horario
   void addSubjectToSchedule() {
     if (subjectController.text.isNotEmpty) {
       setState(() {
@@ -532,6 +536,63 @@ class _SchedulePageState extends State<SchedulePage> {
     }
   }
 
+  // Función para limpiar todo el horario
+  void clearSchedule() {
+    setState(() {
+      schedule.clear();  // Vaciar todo el horario
+      subjectColors.clear();  // Limpiar los colores asociados a las materias
+    });
+  }
+
+  void selectSubject(String hour, String day) {
+    setState(() {
+      selectedSubject = schedule[hour]?[day];  // Almacenar la materia seleccionada
+    });
+  }
+
+  void removeSelectedSubject() {
+    if (selectedSubject != null) {
+      setState(() {
+        schedule.forEach((hour, days) {
+          days.removeWhere((day, subject) => subject == selectedSubject);
+        });
+        selectedSubject = null;  // Resetear la selección después de eliminar
+      });
+    }
+  }
+
+
+  void descargarHorarioComoExcel() {
+    var excel = Excel.createExcel(); // Crear un nuevo archivo Excel
+    Sheet hoja = excel['Horario'];  // Crear una hoja dentro del archivo Excel
+
+    // Crear la primera fila con los días de la semana
+    hoja.appendRow(['Horas', ...days]);
+
+    // Agregar cada fila con las materias y horas correspondientes
+    for (String hour in hours) {
+      List<String> fila = [hour]; // Agregar la hora en la primera columna
+      for (String day in days) {
+        String? materia = schedule[hour] != null ? schedule[hour]![day] : '';
+        fila.add(materia ?? '');
+      }
+      hoja.appendRow(fila);
+    }
+
+    // Convertir el archivo Excel a bytes
+    var excelBytes = excel.encode();
+    if (excelBytes != null) {
+      final blob = html.Blob([excelBytes]);  // Crear un blob para descargar
+      final url = html.Url.createObjectUrlFromBlob(blob);
+      final anchor = html.AnchorElement(href: url)
+        ..setAttribute("download", "Horario.xlsx")
+        ..click();
+      html.Url.revokeObjectUrl(url);
+    }
+  }
+
+
+  // Generar color aleatorio
   Color getRandomColor() {
     Random random = Random();
     return Color.fromARGB(
@@ -615,16 +676,52 @@ class _SchedulePageState extends State<SchedulePage> {
               ],
             ),
             const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: addSubjectToSchedule,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromRGBO(11, 123, 142, 1),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: removeSelectedSubject,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: Text('Eliminar materia seleccionada'),
                 ),
-              ),
-              child: Text('Agregar Materia'),
+                ElevatedButton(
+                  onPressed: addSubjectToSchedule,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromRGBO(11, 123, 142, 1),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text('Agregar Materia'),
+                ),
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: clearSchedule,  // Llamar la función para limpiar el horario
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text('Limpiar Horario'),
+                ),
+                SizedBox(width: 20),
+                ElevatedButton(
+                  onPressed: descargarHorarioComoExcel,  // Llamar la función para descargar como Excel
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: Text('Descargar Horario en Excel'),
+                ),
+              ],
             ),
+
             const SizedBox(height: 20),
             Expanded(
               child: SingleChildScrollView(
@@ -677,10 +774,11 @@ class _SchedulePageState extends State<SchedulePage> {
                               ),
                             ),
                           ),
-                          ...days.map(
-                                (day) {
-                              String? subject = schedule[hour] != null ? schedule[hour]![day] : null;
-                              return Container(
+                          ...days.map((day) {
+                            String? subject = schedule[hour]?[day];
+                            return GestureDetector(
+                              onTap: () => selectSubject(hour, day),  // Seleccionar la materia al hacer clic
+                              child: Container(
                                 height: 50,
                                 padding: EdgeInsets.all(8.0),
                                 color: subject != null ? subjectColors[subject] : Colors.grey[300],
@@ -690,9 +788,9 @@ class _SchedulePageState extends State<SchedulePage> {
                                     style: TextStyle(color: Colors.black),
                                   ),
                                 ),
-                              );
-                            },
-                          ).toList(),
+                              ),
+                            );
+                          }).toList(),
                         ],
                       ),
                     ).toList(),
